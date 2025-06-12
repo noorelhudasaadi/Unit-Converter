@@ -1,0 +1,677 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Unit Converter</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%);
+            min-height: 100vh;
+            padding: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .converter-container {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(15px);
+            border-radius: 25px;
+            padding: 30px;
+            box-shadow: 0 25px 50px rgba(0, 0, 0, 0.15);
+            max-width: 500px;
+            width: 100%;
+            animation: slideIn 0.8s ease-out;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(40px) scale(0.95);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .title {
+            font-size: 2.5rem;
+            font-weight: 800;
+            background: linear-gradient(135deg, #667eea, #764ba2, #f093fb);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 8px;
+        }
+
+        .subtitle {
+            color: #666;
+            font-weight: 300;
+            font-size: 1.1rem;
+        }
+
+        .tabs {
+            display: flex;
+            background: #f1f3f4;
+            border-radius: 15px;
+            padding: 6px;
+            margin-bottom: 30px;
+            overflow-x: auto;
+        }
+
+        .tab {
+            flex: 1;
+            padding: 12px 8px;
+            border: none;
+            background: none;
+            border-radius: 10px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 0.9rem;
+            transition: all 0.3s ease;
+            color: #666;
+            white-space: nowrap;
+            min-width: 80px;
+        }
+
+        .tab.active {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            box-shadow: 0 4px 20px rgba(102, 126, 234, 0.3);
+            transform: translateY(-2px);
+        }
+
+        .converter-section {
+            display: none;
+            animation: fadeIn 0.5s ease-in;
+        }
+
+        .converter-section.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .input-group {
+            margin-bottom: 25px;
+        }
+
+        .input-row {
+            display: flex;
+            gap: 15px;
+            align-items: end;
+        }
+
+        .input-field {
+            flex: 2;
+        }
+
+        .unit-select {
+            flex: 1;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            color: #333;
+            font-weight: 600;
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        input[type="number"] {
+            width: 100%;
+            padding: 15px 18px;
+            border: 2px solid #e1e5e9;
+            border-radius: 12px;
+            font-size: 1.1rem;
+            transition: all 0.3s ease;
+            background: #f8f9fa;
+        }
+
+        input[type="number"]:focus {
+            outline: none;
+            border-color: #667eea;
+            background: white;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+            transform: translateY(-2px);
+        }
+
+        select {
+            width: 100%;
+            padding: 15px 18px;
+            border: 2px solid #e1e5e9;
+            border-radius: 12px;
+            font-size: 1rem;
+            background: #f8f9fa;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        select:focus {
+            outline: none;
+            border-color: #667eea;
+            background: white;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .swap-btn {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 50px;
+            height: 50px;
+            border: none;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 1.2rem;
+            transition: all 0.3s ease;
+            margin: 20px auto;
+            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.3);
+        }
+
+        .swap-btn:hover {
+            transform: rotate(180deg) scale(1.1);
+            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
+        }
+
+        .result-section {
+            background: linear-gradient(135deg, #f8f9fa, #e9ecef);
+            border-radius: 15px;
+            padding: 25px;
+            text-align: center;
+            margin-top: 20px;
+            border: 2px solid #e1e5e9;
+            transition: all 0.3s ease;
+        }
+
+        .result-section.has-result {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            border-color: #667eea;
+            box-shadow: 0 10px 30px rgba(102, 126, 234, 0.2);
+        }
+
+        .result-value {
+            font-size: 2.2rem;
+            font-weight: 800;
+            margin-bottom: 8px;
+            word-break: break-all;
+        }
+
+        .result-unit {
+            font-size: 1.2rem;
+            font-weight: 600;
+            opacity: 0.8;
+        }
+
+        .conversion-formula {
+            margin-top: 15px;
+            font-size: 0.9rem;
+            opacity: 0.7;
+            font-style: italic;
+        }
+
+        .quick-convert {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+            gap: 10px;
+            margin-top: 20px;
+        }
+
+        .quick-btn {
+            padding: 10px 12px;
+            border: 2px solid #e1e5e9;
+            background: #f8f9fa;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 0.85rem;
+            font-weight: 600;
+        }
+
+        .quick-btn:hover {
+            border-color: #667eea;
+            background: rgba(102, 126, 234, 0.1);
+            transform: translateY(-2px);
+        }
+
+        @media (max-width: 600px) {
+            .converter-container {
+                padding: 20px;
+                margin: 10px;
+            }
+
+            .title {
+                font-size: 2rem;
+            }
+
+            .input-row {
+                flex-direction: column;
+                gap: 10px;
+            }
+
+            .tabs {
+                padding: 4px;
+            }
+
+            .tab {
+                padding: 10px 6px;
+                font-size: 0.8rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="converter-container">
+        <div class="header">
+            <h1 class="title">Unit Converter</h1>
+            <p class="subtitle">Convert between different units easily</p>
+        </div>
+
+        <div class="tabs">
+            <button class="tab active" onclick="switchTab('length')">Length</button>
+            <button class="tab" onclick="switchTab('weight')">Weight</button>
+            <button class="tab" onclick="switchTab('temperature')">Temperature</button>
+            <button class="tab" onclick="switchTab('time')">Time</button>
+        </div>
+
+        <!-- Length Converter -->
+        <div id="length" class="converter-section active">
+            <div class="input-group">
+                <label>From</label>
+                <div class="input-row">
+                    <div class="input-field">
+                        <input type="number" id="length-from" placeholder="Enter value" oninput="convertLength()">
+                    </div>
+                    <div class="unit-select">
+                        <select id="length-from-unit" onchange="convertLength()">
+                            <option value="m">Meters</option>
+                            <option value="cm">Centimeters</option>
+                            <option value="mm">Millimeters</option>
+                            <option value="km">Kilometers</option>
+                            <option value="ft">Feet</option>
+                            <option value="in">Inches</option>
+                            <option value="yd">Yards</option>
+                            <option value="mi">Miles</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            <button class="swap-btn" onclick="swapUnits('length')">⇅</button>
+
+            <div class="input-group">
+                <label>To</label>
+                <div class="input-row">
+                    <div class="input-field">
+                        <input type="number" id="length-to" placeholder="Result" readonly>
+                    </div>
+                    <div class="unit-select">
+                        <select id="length-to-unit" onchange="convertLength()">
+                            <option value="ft">Feet</option>
+                            <option value="m">Meters</option>
+                            <option value="cm">Centimeters</option>
+                            <option value="mm">Millimeters</option>
+                            <option value="km">Kilometers</option>
+                            <option value="in">Inches</option>
+                            <option value="yd">Yards</option>
+                            <option value="mi">Miles</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            <div class="quick-convert">
+                <button class="quick-btn" onclick="setQuickConvert('length', 1, 'm', 'ft')">1m → ft</button>
+                <button class="quick-btn" onclick="setQuickConvert('length', 1, 'ft', 'm')">1ft → m</button>
+                <button class="quick-btn" onclick="setQuickConvert('length', 1, 'km', 'mi')">1km → mi</button>
+                <button class="quick-btn" onclick="setQuickConvert('length', 1, 'mi', 'km')">1mi → km</button>
+            </div>
+        </div>
+
+        <!-- Weight Converter -->
+        <div id="weight" class="converter-section">
+            <div class="input-group">
+                <label>From</label>
+                <div class="input-row">
+                    <div class="input-field">
+                        <input type="number" id="weight-from" placeholder="Enter value" oninput="convertWeight()">
+                    </div>
+                    <div class="unit-select">
+                        <select id="weight-from-unit" onchange="convertWeight()">
+                            <option value="kg">Kilograms</option>
+                            <option value="g">Grams</option>
+                            <option value="mg">Milligrams</option>
+                            <option value="lb">Pounds</option>
+                            <option value="oz">Ounces</option>
+                            <option value="ton">Tons</option>
+                            <option value="st">Stones</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            <button class="swap-btn" onclick="swapUnits('weight')">⇅</button>
+
+            <div class="input-group">
+                <label>To</label>
+                <div class="input-row">
+                    <div class="input-field">
+                        <input type="number" id="weight-to" placeholder="Result" readonly>
+                    </div>
+                    <div class="unit-select">
+                        <select id="weight-to-unit" onchange="convertWeight()">
+                            <option value="lb">Pounds</option>
+                            <option value="kg">Kilograms</option>
+                            <option value="g">Grams</option>
+                            <option value="mg">Milligrams</option>
+                            <option value="oz">Ounces</option>
+                            <option value="ton">Tons</option>
+                            <option value="st">Stones</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            <div class="quick-convert">
+                <button class="quick-btn" onclick="setQuickConvert('weight', 1, 'kg', 'lb')">1kg → lb</button>
+                <button class="quick-btn" onclick="setQuickConvert('weight', 1, 'lb', 'kg')">1lb → kg</button>
+                <button class="quick-btn" onclick="setQuickConvert('weight', 1, 'g', 'oz')">1g → oz</button>
+                <button class="quick-btn" onclick="setQuickConvert('weight', 1, 'oz', 'g')">1oz → g</button>
+            </div>
+        </div>
+
+        <!-- Temperature Converter -->
+        <div id="temperature" class="converter-section">
+            <div class="input-group">
+                <label>From</label>
+                <div class="input-row">
+                    <div class="input-field">
+                        <input type="number" id="temp-from" placeholder="Enter value" oninput="convertTemperature()">
+                    </div>
+                    <div class="unit-select">
+                        <select id="temp-from-unit" onchange="convertTemperature()">
+                            <option value="c">Celsius (°C)</option>
+                            <option value="f">Fahrenheit (°F)</option>
+                            <option value="k">Kelvin (K)</option>
+                            <option value="r">Rankine (°R)</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            <button class="swap-btn" onclick="swapUnits('temperature')">⇅</button>
+
+            <div class="input-group">
+                <label>To</label>
+                <div class="input-row">
+                    <div class="input-field">
+                        <input type="number" id="temp-to" placeholder="Result" readonly>
+                    </div>
+                    <div class="unit-select">
+                        <select id="temp-to-unit" onchange="convertTemperature()">
+                            <option value="f">Fahrenheit (°F)</option>
+                            <option value="c">Celsius (°C)</option>
+                            <option value="k">Kelvin (K)</option>
+                            <option value="r">Rankine (°R)</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            <div class="quick-convert">
+                <button class="quick-btn" onclick="setQuickConvert('temperature', 0, 'c', 'f')">0°C → °F</button>
+                <button class="quick-btn" onclick="setQuickConvert('temperature', 32, 'f', 'c')">32°F → °C</button>
+                <button class="quick-btn" onclick="setQuickConvert('temperature', 100, 'c', 'f')">100°C → °F</button>
+                <button class="quick-btn" onclick="setQuickConvert('temperature', 273.15, 'k', 'c')">273K → °C</button>
+            </div>
+        </div>
+
+        <!-- Time Converter -->
+        <div id="time" class="converter-section">
+            <div class="input-group">
+                <label>From</label>
+                <div class="input-row">
+                    <div class="input-field">
+                        <input type="number" id="time-from" placeholder="Enter value" oninput="convertTime()">
+                    </div>
+                    <div class="unit-select">
+                        <select id="time-from-unit" onchange="convertTime()">
+                            <option value="s">Seconds</option>
+                            <option value="min">Minutes</option>
+                            <option value="h">Hours</option>
+                            <option value="d">Days</option>
+                            <option value="w">Weeks</option>
+                            <option value="month">Months</option>
+                            <option value="y">Years</option>
+                            <option value="ms">Milliseconds</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            <button class="swap-btn" onclick="swapUnits('time')">⇅</button>
+
+            <div class="input-group">
+                <label>To</label>
+                <div class="input-row">
+                    <div class="input-field">
+                        <input type="number" id="time-to" placeholder="Result" readonly>
+                    </div>
+                    <div class="unit-select">
+                        <select id="time-to-unit" onchange="convertTime()">
+                            <option value="min">Minutes</option>
+                            <option value="s">Seconds</option>
+                            <option value="h">Hours</option>
+                            <option value="d">Days</option>
+                            <option value="w">Weeks</option>
+                            <option value="month">Months</option>
+                            <option value="y">Years</option>
+                            <option value="ms">Milliseconds</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            <div class="quick-convert">
+                <button class="quick-btn" onclick="setQuickConvert('time', 1, 'h', 'min')">1h → min</button>
+                <button class="quick-btn" onclick="setQuickConvert('time', 1, 'd', 'h')">1d → h</button>
+                <button class="quick-btn" onclick="setQuickConvert('time', 1, 'w', 'd')">1w → d</button>
+                <button class="quick-btn" onclick="setQuickConvert('time', 1, 'y', 'd')">1y → d</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Conversion factors to base units
+        const lengthFactors = {
+            m: 1,
+            cm: 0.01,
+            mm: 0.001,
+            km: 1000,
+            ft: 0.3048,
+            in: 0.0254,
+            yd: 0.9144,
+            mi: 1609.344
+        };
+
+        const weightFactors = {
+            kg: 1,
+            g: 0.001,
+            mg: 0.000001,
+            lb: 0.453592,
+            oz: 0.0283495,
+            ton: 1000,
+            st: 6.35029
+        };
+
+        const timeFactors = {
+            s: 1,
+            min: 60,
+            h: 3600,
+            d: 86400,
+            w: 604800,
+            month: 2629746,
+            y: 31556952,
+            ms: 0.001
+        };
+
+        function switchTab(tabName) {
+            // Remove active class from all tabs and sections
+            document.querySelectorAll('.tab').forEach(tab => tab.classList.remove('active'));
+            document.querySelectorAll('.converter-section').forEach(section => section.classList.remove('active'));
+            
+            // Add active class to clicked tab and corresponding section
+            event.target.classList.add('active');
+            document.getElementById(tabName).classList.add('active');
+        }
+
+        function convertLength() {
+            const fromValue = parseFloat(document.getElementById('length-from').value);
+            const fromUnit = document.getElementById('length-from-unit').value;
+            const toUnit = document.getElementById('length-to-unit').value;
+            
+            if (isNaN(fromValue)) {
+                document.getElementById('length-to').value = '';
+                return;
+            }
+            
+            const baseValue = fromValue * lengthFactors[fromUnit];
+            const result = baseValue / lengthFactors[toUnit];
+            
+            document.getElementById('length-to').value = formatResult(result);
+        }
+
+        function convertWeight() {
+            const fromValue = parseFloat(document.getElementById('weight-from').value);
+            const fromUnit = document.getElementById('weight-from-unit').value;
+            const toUnit = document.getElementById('weight-to-unit').value;
+            
+            if (isNaN(fromValue)) {
+                document.getElementById('weight-to').value = '';
+                return;
+            }
+            
+            const baseValue = fromValue * weightFactors[fromUnit];
+            const result = baseValue / weightFactors[toUnit];
+            
+            document.getElementById('weight-to').value = formatResult(result);
+        }
+
+        function convertTemperature() {
+            const fromValue = parseFloat(document.getElementById('temp-from').value);
+            const fromUnit = document.getElementById('temp-from-unit').value;
+            const toUnit = document.getElementById('temp-to-unit').value;
+            
+            if (isNaN(fromValue)) {
+                document.getElementById('temp-to').value = '';
+                return;
+            }
+            
+            let celsius;
+            
+            // Convert to Celsius first
+            switch(fromUnit) {
+                case 'c': celsius = fromValue; break;
+                case 'f': celsius = (fromValue - 32) * 5/9; break;
+                case 'k': celsius = fromValue - 273.15; break;
+                case 'r': celsius = (fromValue - 491.67) * 5/9; break;
+            }
+            
+            // Convert from Celsius to target unit
+            let result;
+            switch(toUnit) {
+                case 'c': result = celsius; break;
+                case 'f': result = celsius * 9/5 + 32; break;
+                case 'k': result = celsius + 273.15; break;
+                case 'r': result = celsius * 9/5 + 491.67; break;
+            }
+            
+            document.getElementById('temp-to').value = formatResult(result);
+        }
+
+        function convertTime() {
+            const fromValue = parseFloat(document.getElementById('time-from').value);
+            const fromUnit = document.getElementById('time-from-unit').value;
+            const toUnit = document.getElementById('time-to-unit').value;
+            
+            if (isNaN(fromValue)) {
+                document.getElementById('time-to').value = '';
+                return;
+            }
+            
+            const baseValue = fromValue * timeFactors[fromUnit];
+            const result = baseValue / timeFactors[toUnit];
+            
+            document.getElementById('time-to').value = formatResult(result);
+        }
+
+        function formatResult(result) {
+            if (result === 0) return '0';
+            if (Math.abs(result) >= 1000000 || Math.abs(result) < 0.0001) {
+                return result.toExponential(6);
+            }
+            return parseFloat(result.toPrecision(8));
+        }
+
+        function swapUnits(type) {
+            const fromUnit = document.getElementById(`${type}-from-unit`);
+            const toUnit = document.getElementById(`${type}-to-unit`);
+            const fromValue = document.getElementById(`${type}-from`);
+            const toValue = document.getElementById(`${type}-to`);
+            
+            // Swap unit selections
+            const tempUnit = fromUnit.value;
+            fromUnit.value = toUnit.value;
+            toUnit.value = tempUnit;
+            
+            // Swap values
+            const tempValue = fromValue.value;
+            fromValue.value = toValue.value;
+            toValue.value = '';
+            
+            // Trigger conversion
+            switch(type) {
+                case 'length': convertLength(); break;
+                case 'weight': convertWeight(); break;
+                case 'temperature': convertTemperature(); break;
+                case 'time': convertTime(); break;
+            }
+        }
+
+        function setQuickConvert(type, value, fromUnit, toUnit) {
+            document.getElementById(`${type}-from`).value = value;
+            document.getElementById(`${type}-from-unit`).value = fromUnit;
+            document.getElementById(`${type}-to-unit`).value = toUnit;
+            
+            switch(type) {
+                case 'length': convertLength(); break;
+                case 'weight': convertWeight(); break;
+                case 'temperature': convertTemperature(); break;
+                case 'time': convertTime(); break;
+            }
+        }
+    </script>
+</body>
+</html>
